@@ -125,7 +125,8 @@ namespace nccid
             }
             var enumopts= new EnumerationOptions()
             {
-                MatchCasing = MatchCasing.CaseInsensitive
+                MatchCasing = MatchCasing.CaseInsensitive,
+				RecurseSubdirectories = true
             };
             var dotstrip = new Regex("^\\.\\/");
             foreach (var dcm in fileSystem.Directory.EnumerateFiles(".", "*.dcm", enumopts))
