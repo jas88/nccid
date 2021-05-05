@@ -117,6 +117,7 @@ namespace nccid
                     var json = datum.ToJson();
                     await using var ms = new MemoryStream(json, false);
                     await tu.UploadAsync(ms, o.bucket, datum.S3Path(o.prefix), ct);
+                    Console.WriteLine($"Uploaded CSV row {csv.Parser.Row}");
                 }
                 catch (Exception e)
                 {
@@ -125,7 +126,7 @@ namespace nccid
             }
             var enumopts= new EnumerationOptions()
             {
-                MatchCasing = MatchCasing.CaseInsensitive,
+                MatchCasing = MatchCasing.PlatformDefault,
 				RecurseSubdirectories = true
             };
             var dotstrip = new Regex("^\\.\\/");
@@ -134,7 +135,14 @@ namespace nccid
                 var _dcm = dotstrip.Replace(dcm, "");
                 try
                 {
-                    await tu.UploadAsync(dcm, o.bucket, $"{o.prefix}{DateTime.Now.ToString("yyyy-MM-dd")}/images/{_dcm}", ct);
+                    var attr = File.GetAttributes(_dcm);
+                    // Ignore file unless Archive bit set; if uploaded successfully, clear that bit.
+                    if ((attr & FileAttributes.Archive) == FileAttributes.Archive)
+                    {
+                        await tu.UploadAsync(dcm, o.bucket, $"{o.prefix}{DateTime.Now.ToString("yyyy-MM-dd")}/images/{_dcm}", ct);
+                        attr &= ~FileAttributes.Archive;
+                        File.SetAttributes(_dcm, attr);
+                    }
                 }
                 catch (Exception e)
                 {
