@@ -60,7 +60,6 @@ namespace nccid
             using var csvout = new CsvWriter(writer, CultureInfo.InvariantCulture);
             csvout.WriteHeader<FetchItem>();
             csvout.NextRecord();
-            var swabs = new List<Swab>();
             csv.Read();
             csv.ReadHeader();
             while (csv.Read())
@@ -95,9 +94,9 @@ namespace nccid
         {
             var pacs=new DicomClient(o.Theirhost, o.Theirport, false, o.Ourname, o.Theirname);
             pacs.NegotiateAsyncOps();
-            using var reader = new StreamReader(fileSystem.FileStream.Create(o.Filename,FileMode.Open));
-            using var csv = new CsvReader(reader, CultureInfo.GetCultureInfo("en-GB"));
-
+            //using var reader = new StreamReader(fileSystem.FileStream.Create(o.Filename,FileMode.Open));
+            //using var csv = new CsvReader(reader, CultureInfo.GetCultureInfo("en-GB"));
+            // TODO: Complete PACS fetch code.
         }
 
         public async Task Upload(UploadOptions o)
