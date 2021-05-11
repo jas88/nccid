@@ -1,5 +1,4 @@
 extraction:
   csharp:
     index:
-      dotnet:
-        buildless: true
+      buildless: true
