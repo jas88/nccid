@@ -82,7 +82,7 @@ namespace nccid
                 };
                 await pacs.AddRequestAsync(req);
                 await pacs.SendAsync();
-                swabs.Add(pt);
+                //swabs.Add(pt);
                 if (studies.Count > 0)
                 {
                     csvout.WriteRecord(new FetchItem(pt.Chi,pt.Result==1,pt.When));
