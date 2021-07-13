@@ -8,6 +8,9 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Amazon;
+using Amazon.Runtime;
+using Amazon.S3;
 using Amazon.S3.Transfer;
 using CommandLine;
 using CsvHelper;
@@ -102,7 +105,9 @@ namespace nccid
         public async Task Upload(UploadOptions o)
         {
             var ct = new CancellationToken();
-            using var tu = new TransferUtility(o.AwsId,o.AwsKey);
+            var creds = new BasicAWSCredentials(o.AwsId, o.AwsKey);
+            var s3 = new AmazonS3Client(creds, RegionEndpoint.EUWest2);
+            using var tu = new TransferUtility(s3);
             using var reader = new StreamReader(fileSystem.FileStream.Create(o.Filename,FileMode.Open));
             using var csv = new CsvReader(reader, CultureInfo.GetCultureInfo("en-GB"));
             csv.Read();
