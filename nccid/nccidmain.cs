@@ -136,7 +136,8 @@ namespace nccid
             var dotstrip = new Regex("^\\.\\/");
             foreach (var dcm in fileSystem.Directory.EnumerateFiles(".", "*.dcm", enumopts))
             {
-                var _dcm = dotstrip.Replace(dcm, "");
+                // Ensure we don't send S3 any grubby DOS-style delimiters: https://github.com/jas88/nccid/issues/52
+                var _dcm = dotstrip.Replace(dcm, "").Replace(@"\","/");
                 try
                 {
                     var attr = File.GetAttributes(_dcm);
