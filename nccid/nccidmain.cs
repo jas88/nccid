@@ -116,7 +116,7 @@ namespace nccid
             {
                 try
                 {
-                    var datum = INCCIDdata.Make(csv.GetField<int>("Status") != 0, csv.GetField<DateTime>("Date"),
+                    var datum = INCCIDdata.Make(o.CentreName, csv.GetField<int>("Status") != 0, csv.GetField<DateTime>("Date"),
                         csv.GetField("ID"));
                     var json = datum.ToJson();
                     await using var ms = new MemoryStream(json, false);
