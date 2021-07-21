@@ -11,6 +11,7 @@ https://github.com/jas88/nccid/compare/v0.0.3...v0.0.4
 - Make Submitting Centre value configurable, defaulting to "NHS Scotland" (issue 58)
 - Make PCR result handling more flexible (issue 59)
 - Added this CHANGELOG, backfilling information where available
+- Fixed embedded version number to match Github release
 
 ## v0.0.3 2021-07-21
 
