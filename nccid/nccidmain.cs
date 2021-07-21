@@ -133,11 +133,11 @@ namespace nccid
                 MatchCasing = MatchCasing.PlatformDefault,
 				RecurseSubdirectories = true
             };
-            var dotstrip = new Regex("^\\.\\/");
+            var dotstrip = new Regex(@"^[\\/]\.[\\/]");
             foreach (var dcm in fileSystem.Directory.EnumerateFiles(".", "*.dcm", enumopts))
             {
                 // Ensure we don't send S3 any grubby DOS-style delimiters: https://github.com/jas88/nccid/issues/52
-                var _dcm = dotstrip.Replace(dcm, "").Replace(@"\","/");
+                var _dcm = dotstrip.Replace(dcm, "/").Replace(@"\","/");
                 try
                 {
                     var attr = File.GetAttributes(_dcm);

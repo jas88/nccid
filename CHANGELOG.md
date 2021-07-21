@@ -4,6 +4,8 @@
 
 https://github.com/jas88/nccid/compare/v0.0.4...main
 
+- Fix stray /./ in image paths for upload
+
 ## v0.0.4 2021-07-21
 
 https://github.com/jas88/nccid/compare/v0.0.3...v0.0.4
