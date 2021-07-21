@@ -41,6 +41,9 @@ namespace nccid
 
     public class UploadOptions : Options
     {
+        [Option("centre", Required = false, Default = "NHS Scotland", HelpText = "Name of submitting centre")]
+        public string CentreName { get; set; } = "NHS Scotland";
+
         [Option("bucket",Required = true,HelpText = "S3 bucket to upload to")]
         public string bucket { get; set; }
         [Option("prefix",Required = false,Default="",HelpText = "Prefix to add to uploaded files")]

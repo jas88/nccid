@@ -10,7 +10,7 @@ namespace nccid
     {
         public string Pseudonym { get; }
         internal readonly DateTime when;
-        public string SubmittingCentre { get; } = "NHS Tayside";
+        public string SubmittingCentre { get; }
         public string PatientGroup
         {
             get
@@ -24,17 +24,18 @@ namespace nccid
             }
         }
 
-        protected INCCIDdata(DateTime @when,string pn)
+        protected INCCIDdata(string cn, DateTime @when,string pn)
         {
+            SubmittingCentre = cn;
             Pseudonym = pn;
             this.when = when;
         }
 
-        public static INCCIDdata Make(bool pos,DateTime _when,string _pn)
+        public static INCCIDdata Make(string centreName, bool pos,DateTime _when,string _pn)
         {
             if (pos)
-                return new PositiveData(_when,_pn);
-            else return new NegativeData(_when,_pn);
+                return new PositiveData(centreName,_when,_pn);
+            else return new NegativeData(centreName,_when,_pn);
         }
 
         public abstract byte[] ToJson();
@@ -56,7 +57,7 @@ namespace nccid
             return $"{prefix}{DateTime.Now.ToString("yyyy-MM-dd")}/data/{Pseudonym}_data.json";
         }
 
-        public PositiveData(DateTime when,string pn) : base(when,pn)
+        public PositiveData(string centreName, DateTime when,string pn) : base(centreName,when,pn)
         {
         }
     }
@@ -76,7 +77,7 @@ namespace nccid
             return $"{prefix}{DateTime.Now.ToString("yyyy-MM-dd")}/data/{Pseudonym}_status.json";
         }
 
-        public NegativeData(DateTime when,string pn) : base(when,pn)
+        public NegativeData(string centreName, DateTime when,string pn) : base(centreName,when,pn)
         {
         }
     }
