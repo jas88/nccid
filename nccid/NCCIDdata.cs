@@ -31,8 +31,18 @@ namespace nccid
             this.when = when;
         }
 
-        public static INCCIDdata Make(string centreName, bool pos,DateTime _when,string _pn)
+        public static INCCIDdata Make(string centreName, string pcrpos,DateTime _when,string _pn)
         {
+            bool pos = pcrpos.ToLowerInvariant() switch
+            {
+                "0" => false,
+                "negative" => false,
+
+                "1" => true,
+                "positive" => true,
+
+                _ => throw new ArgumentException($"Invalid PCR test result '{pcrpos}'")
+            };
             if (pos)
                 return new PositiveData(centreName,_when,_pn);
             else return new NegativeData(centreName,_when,_pn);
