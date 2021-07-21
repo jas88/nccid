@@ -2,7 +2,13 @@
 
 ## Unreleased
 
-https://github.com/jas88/nccid/compare/v0.0.5...main
+https://github.com/jas88/nccid/compare/v0.0.6...main
+
+## v0.0.6 2021-07-21
+
+https://github.com/jas88/nccid/compare/v0.0.5...v0.0.6
+
+- Bugfix release to finish fixing issue 66 fully
 
 ## v0.0.5 2021-07-21
 

@@ -133,20 +133,20 @@ namespace nccid
                 MatchCasing = MatchCasing.PlatformDefault,
 				RecurseSubdirectories = true
             };
-            var dotstrip = new Regex(@"^[\\/]\.[\\/]");
+            var dotstrip = new Regex(@"(^|[\\/])\.[\\/]");
             foreach (var dcm in fileSystem.Directory.EnumerateFiles(".", "*.dcm", enumopts))
             {
                 // Ensure we don't send S3 any grubby DOS-style delimiters: https://github.com/jas88/nccid/issues/52
-                var _dcm = dotstrip.Replace(dcm, "/").Replace(@"\","/");
+                var _dcm = dotstrip.Replace(dcm, "/").Replace(@"\","/").Replace("//","/");
                 try
                 {
-                    var attr = File.GetAttributes(_dcm);
+                    var attr = File.GetAttributes(dcm);
                     // Ignore file unless Archive bit set; if uploaded successfully, clear that bit.
                     if ((attr & FileAttributes.Archive) == FileAttributes.Archive)
                     {
                         await tu.UploadAsync(dcm, o.bucket, $"{o.prefix}{DateTime.Now.ToString("yyyy-MM-dd")}/images/{_dcm}", ct);
                         attr &= ~FileAttributes.Archive;
-                        File.SetAttributes(_dcm, attr);
+                        File.SetAttributes(dcm, attr);
                     }
                 }
                 catch (Exception e)
