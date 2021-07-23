@@ -102,12 +102,11 @@ namespace nccid
             // TODO: Complete PACS fetch code.
         }
 
-        public async Task Upload(UploadOptions o)
+        public delegate Task ObjectSender(Stream data, string bucket, string key, CancellationToken ct);
+
+        public async Task Upload(UploadOptions o,ObjectSender os)
         {
             var ct = new CancellationToken();
-            var creds = new BasicAWSCredentials(o.AwsId, o.AwsKey);
-            var s3 = new AmazonS3Client(creds, RegionEndpoint.EUWest2);
-            using var tu = new TransferUtility(s3);
             using var reader = new StreamReader(fileSystem.FileStream.Create(o.Filename,FileMode.Open));
             using var csv = new CsvReader(reader, CultureInfo.GetCultureInfo("en-GB"));
             csv.Read();
@@ -120,7 +119,7 @@ namespace nccid
                         csv.GetField("ID"));
                     var json = datum.ToJson();
                     await using var ms = new MemoryStream(json, false);
-                    await tu.UploadAsync(ms, o.bucket, datum.S3Path(o.prefix), ct);
+                    await os(ms, o.bucket, datum.S3Path(o.prefix), ct);
                     Console.WriteLine($"Uploaded CSV row {csv.Parser.Row}");
                 }
                 catch (Exception e)
@@ -144,7 +143,9 @@ namespace nccid
                     // Ignore file unless Archive bit set; if uploaded successfully, clear that bit.
                     if ((attr & FileAttributes.Archive) == FileAttributes.Archive)
                     {
-                        await tu.UploadAsync(dcm, o.bucket, $"{o.prefix}{DateTime.Now.ToString("yyyy-MM-dd")}/images/{_dcm}", ct);
+                        using (var dcmstream = File.Open(dcm, FileMode.Open)) {
+                            await os(dcmstream, o.bucket, $"{o.prefix}{DateTime.Now.ToString("yyyy-MM-dd")}/images/{_dcm}", ct);
+                        }
                         attr &= ~FileAttributes.Archive;
                         File.SetAttributes(dcm, attr);
                     }
@@ -180,7 +181,12 @@ upload  Send retrieved patient data to the NCCID repository");
                     await Parser.Default.ParseArguments<FetchOptions>(args).WithParsedAsync(async o=>await prog.Fetch(o));
                     break;
                 case "upload":
-                    await Parser.Default.ParseArguments<UploadOptions>(args).WithParsedAsync(async o=>await prog.Upload(o));
+                    await Parser.Default.ParseArguments<UploadOptions>(args).WithParsedAsync(async o=> {
+                        var creds = new BasicAWSCredentials(o.AwsId, o.AwsKey);
+                        var s3 = new AmazonS3Client(creds, RegionEndpoint.EUWest2);
+                        using var tu = new TransferUtility(s3);
+                        await prog.Upload(o,tu.UploadAsync);
+                    });
                     break;
             }
         }

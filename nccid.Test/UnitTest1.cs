@@ -1,14 +1,6 @@
-using System;
 using System.Collections.Generic;
-using System.IO.Abstractions;
+using System.IO;
 using System.IO.Abstractions.TestingHelpers;
-using System.IO.MemoryMappedFiles;
-using System.Linq;
-using System.Net;
-using BadMedicine;
-using BadMedicine.Dicom;
-using Dicom;
-using NuGet.Frameworks;
 using NUnit.Framework;
 
 namespace nccid.Test
@@ -32,6 +24,10 @@ PAT999,0,1/3,2017
                 }
             });
             prog = new Nccidmain(mfs);
+            Nccidmain.ObjectSender p = async (body,bucket,key,ct) => { };
+            prog.Upload(new UploadOptions {
+                Filename="test.csv"
+            }, p).Wait();
         }
 
         [SetUp]
