@@ -33,23 +33,23 @@ namespace nccid
         {
             return t.ToString("yyyyMMdd");
         }
-        
-        private static string datewin(DateTime mid)
+
+        public static string DicomWindow(DateTime t,int preyears, int pre,int? post)
         {
-            return $"{DicomDate(mid.AddDays(-210))}-{DicomDate(mid.AddDays(210))}";
+            return $"{t.AddYears(-preyears).AddDays(-pre).ToString("yyyyMMdd")}-{(post.HasValue?t.AddDays(post.Value).ToString("yyyyMMdd"):"")}";
         }
 
         public record FetchItem
         {
-            public DateTime Start { get; }
+            public string Window { get; }
             public string Chi { get; }
             public bool Covid { get; }
 
-            public FetchItem(string ptChi, bool b, DateTime ptWhen)
+            public FetchItem(string ptChi, bool b, string window)
             {
                 Chi = ptChi;
                 Covid = b;
-                Start = ptWhen.AddMonths(1-ptWhen.Month).AddDays(1-ptWhen.Day).AddYears(-3);
+                this.Window = window;
             }
         }
         
@@ -68,11 +68,12 @@ namespace nccid
             while (csv.Read())
             {
                 var studies = new List<string>();
-                var pt = new Swab(csv);
+                var pt = INCCIDdata.Make("Dummy centre name", csv.GetField<string>("Status"), csv.GetField<DateTime>("Date"),
+                        csv.GetField("ID"));
                 var req=new DicomCFindRequest(DicomQueryRetrieveLevel.Study);
                 req.Dataset.AddOrUpdate(new DicomTag(0x8, 0x5), "ISO_IR 192");
-                req.Dataset.AddOrUpdate(DicomTag.StudyDate, datewin(pt.When));
-                req.Dataset.AddOrUpdate(DicomTag.PatientID, pt.Chi);
+                req.Dataset.AddOrUpdate(DicomTag.StudyDate, DicomWindow(pt.when,0,21,21));
+                req.Dataset.AddOrUpdate(DicomTag.PatientID, pt.Pseudonym);
                 req.Dataset.AddOrUpdate(DicomTag.StudyInstanceUID, "");
                 req.OnResponseReceived += (req, resp) =>
                 {
@@ -85,7 +86,7 @@ namespace nccid
                 //swabs.Add(pt);
                 if (studies.Count > 0)
                 {
-                    csvout.WriteRecord(new FetchItem(pt.Chi,pt.Result==1,pt.When));
+                    csvout.WriteRecord(new FetchItem(pt.Pseudonym,pt is PositiveData,pt.When));
                     csvout.NextRecord();
                 }
                 Console.WriteLine(JsonSerializer.Serialize(pt));
