@@ -11,12 +11,14 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name : coverlet
-      run: dotnet test --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=lcov
+      run: |
+      dotnet test --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=lcov
+      mv nccid.Test/TestResults/*/coverage.info lcov.info
     - name: coveralls      
       uses: coverallsapp/github-action@v1.1.1
       with:
         github-token: ${{secrets.GITHUB_TOKEN }} 
-        path-to-lcov: 'nccid.Test/TestResults/*/coverage.info'
+        path-to-lcov: 'lcov.info'
     - name: Build
       run: ./build.sh
     - name: Upload binaries to release
