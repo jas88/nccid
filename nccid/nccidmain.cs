@@ -29,16 +29,6 @@ namespace nccid
             this.fileSystem = fileSystem;
         }
 
-        private static string DicomDate(DateTime t)
-        {
-            return t.ToString("yyyyMMdd");
-        }
-
-        public static string DicomWindow(DateTime t,int preyears, int pre,int? post)
-        {
-            return $"{t.AddYears(-preyears).AddDays(-pre).ToString("yyyyMMdd")}-{(post.HasValue?t.AddDays(post.Value).ToString("yyyyMMdd"):"")}";
-        }
-
         public record FetchItem
         {
             public string Window { get; }
@@ -72,7 +62,7 @@ namespace nccid
                         csv.GetField("ID"));
                 var req=new DicomCFindRequest(DicomQueryRetrieveLevel.Study);
                 req.Dataset.AddOrUpdate(new DicomTag(0x8, 0x5), "ISO_IR 192");
-                req.Dataset.AddOrUpdate(DicomTag.StudyDate, DicomWindow(pt.when,0,21,21));
+                req.Dataset.AddOrUpdate(DicomTag.StudyDate, Utils.DicomWindow(pt.when,0,21,21));
                 req.Dataset.AddOrUpdate(DicomTag.PatientID, pt.Pseudonym);
                 req.Dataset.AddOrUpdate(DicomTag.StudyInstanceUID, "");
                 req.OnResponseReceived += (req, resp) =>

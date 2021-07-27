@@ -49,7 +49,7 @@ namespace nccid
         [JsonPropertyName("Date of Positive Covid Swab")]
         public string SwabDate => base.when.ToString("MM/dd/yyyy");
 
-        public override string When => Nccidmain.DicomWindow(when, 3, when.DayOfYear, null);
+        public override string When => Utils.DicomWindow(when, 3, when.DayOfYear, null);
 
         public override byte[] ToJson()
         {
