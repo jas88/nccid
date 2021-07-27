@@ -20,7 +20,7 @@ namespace nccid.Test
         public static void DicomWindow()
         {
             Assert.AreEqual("19800224-", Utils.DicomWindow(bd, 0, 0, null));
-            Assert.AreEqual("19800224-19790216", Utils.DicomWindow(bd, 1, 8, 4));
+            Assert.AreEqual("19790216-19800224", Utils.DicomWindow(bd, 1, 8, 4));
         }
     }
 }
