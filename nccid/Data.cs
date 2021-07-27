@@ -10,7 +10,7 @@ namespace nccid
     public abstract class INCCIDdata
     {
         public string Pseudonym { get; }
-        internal readonly DateTime when;
+        public readonly DateTime when;
         public string SubmittingCentre { get; }
 
         protected INCCIDdata(string cn, DateTime @when,string pn)
