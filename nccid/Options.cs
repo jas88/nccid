@@ -2,12 +2,12 @@ using CommandLine;
 
 namespace nccid
 {
-    public class Options
+    public abstract class Options
     {
             
     }
         
-    public class PacsOptions : Options
+    public abstract class PacsOptions : Options
     {
         [Option("pacshost", Required = true)]
         public string Theirhost { get; set;  }
@@ -25,6 +25,7 @@ namespace nccid
         public string Ourname { get; set; }
     }
 
+    [Verb("search", HelpText = "Query the PACS for relevant patient data")]
     public class SearchOptions : PacsOptions
     {
         [Option("csv",Required = true,HelpText = "CSV file to search")]
@@ -34,11 +35,13 @@ namespace nccid
         public string Output { get; set; } = "results.csv";
     }
 
+    [Verb("fetch", HelpText = "(TODO) Retrieve data from the PACS")]
     public class FetchOptions : PacsOptions
     {
         public string Filename { get; set; }
     }
 
+    [Verb("upload",HelpText = "Send retrieved patient data to the NCCID repository")]
     public class UploadOptions : Options
     {
         [Option("centre", Required = false, Default = "NHS Scotland", HelpText = "Name of submitting centre")]

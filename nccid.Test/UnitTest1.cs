@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions.TestingHelpers;
+using System.Threading.Tasks;
 using NUnit.Framework;
 
 namespace nccid.Test
@@ -24,7 +25,7 @@ PAT999,0,1/3,2017
                 }
             });
             prog = new Nccidmain(mfs);
-            Nccidmain.ObjectSender p = async (body,bucket,key,ct) => { };
+            Nccidmain.ObjectSender p = async (body,bucket,key,ct) => { await Task.Delay(0); };
             prog.Upload(new UploadOptions {
                 Filename="test.csv"
             }, p).Wait();
@@ -58,9 +59,8 @@ PAT999,0,1/3,2017
                 Ourport = 104,
                 Filename="test.csv"
             };
-            prog.Search(po);
+            prog.Search(po).RunSynchronously();
             Assert.True(mfs.FileExists(po.Output));
-            System.IO.File.WriteAllText("/tmp/test.csv",mfs.File.ReadAllText(po.Output));
         }
 
         [Test]
