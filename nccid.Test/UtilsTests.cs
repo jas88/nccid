@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using NUnit.Framework;
 
 namespace nccid.Test
@@ -8,7 +9,12 @@ namespace nccid.Test
         /// <summary>
         /// Arbitrary date to use in testing
         /// </summary>
-        private static readonly DateTime bd = new(1980, 2, 24);
+        internal static readonly DateTime bd = new(1980, 2, 24);
+
+        /// <summary>
+        /// UTF8 encoding used repeatedly
+        /// </summary>
+        internal static Encoding utf8 = Encoding.UTF8;
 
         [Test]
         public static void DicomDate()
