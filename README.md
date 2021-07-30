@@ -2,6 +2,11 @@
 
 Tooling for the National Covid-19 Chest Imaging Database
 
+## Release status
+
+[![Unit Tests](https://github.com/jas88/nccid/actions/workflows/test-publish.yml/badge.svg)](https://github.com/jas88/nccid/actions/workflows/test-publish.yml) [![Coverage Status](https://coveralls.io/repos/github/jas88/nccid/badge.svg?branch=main)](https://coveralls.io/github/jas88/nccid?branch=main) [![Total alerts](https://img.shields.io/lgtm/alerts/g/jas88/nccid.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jas88/nccid/alerts/)
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/jas88/nccid.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jas88/nccid/alerts/)
+
 ## Notes
 
 Before running the first time, ensure all DICOM files have the Archive bit set:

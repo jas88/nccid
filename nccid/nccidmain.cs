@@ -29,16 +29,6 @@ namespace nccid
             this.fileSystem = fileSystem;
         }
 
-        private static string DicomDate(DateTime t)
-        {
-            return t.ToString("yyyyMMdd");
-        }
-
-        public static string DicomWindow(DateTime t,int preyears, int pre,int? post)
-        {
-            return $"{t.AddYears(-preyears).AddDays(-pre).ToString("yyyyMMdd")}-{(post.HasValue?t.AddDays(post.Value).ToString("yyyyMMdd"):"")}";
-        }
-
         public record FetchItem
         {
             public string Window { get; }
@@ -72,7 +62,7 @@ namespace nccid
                         csv.GetField("ID"));
                 var req=new DicomCFindRequest(DicomQueryRetrieveLevel.Study);
                 req.Dataset.AddOrUpdate(new DicomTag(0x8, 0x5), "ISO_IR 192");
-                req.Dataset.AddOrUpdate(DicomTag.StudyDate, DicomWindow(pt.when,0,21,21));
+                req.Dataset.AddOrUpdate(DicomTag.StudyDate, Utils.DicomWindow(pt.when,0,21,21));
                 req.Dataset.AddOrUpdate(DicomTag.PatientID, pt.Pseudonym);
                 req.Dataset.AddOrUpdate(DicomTag.StudyInstanceUID, "");
                 req.OnResponseReceived += (req, resp) =>
@@ -101,6 +91,7 @@ namespace nccid
             //using var reader = new StreamReader(fileSystem.FileStream.Create(o.Filename,FileMode.Open));
             //using var csv = new CsvReader(reader, CultureInfo.GetCultureInfo("en-GB"));
             // TODO: Complete PACS fetch code.
+            await Task.Delay(0);
         }
 
         public delegate Task ObjectSender(Stream data, string bucket, string key, CancellationToken ct);
@@ -158,38 +149,20 @@ namespace nccid
             }
         }
 
-        static async Task Main(string[] args)
+        static int Main(string[] args)
         {
             var prog = new Nccidmain(new FileSystem());
-            switch (args.Length>0?args[0]:"help")
+            Parser.Default.ParseArguments<SearchOptions, FetchOptions, UploadOptions>(args)
+                .WithParsed<SearchOptions>(o => prog.Search(o).RunSynchronously())
+                .WithParsed<FetchOptions>(o => prog.Fetch(o).RunSynchronously())
+                .WithParsed<UploadOptions>(o =>
             {
-                case "help":
-                    Console.WriteLine(@"The first argument must be a verb:
-
-help    Display this help text
-version Display the version number
-search  Search a PACS for patient data using QR C-FIND
-fetch   Retrieve PACS data from a search operation
-upload  Send retrieved patient data to the NCCID repository");
-                    break;
-                case "version":
-                    Parser.Default.ParseArguments<Options>(new string[]{"--version"});
-                    break;
-                case "search":
-                    await Parser.Default.ParseArguments<SearchOptions>(args).WithParsedAsync(async o=>await prog.Search(o));
-                    break;
-                case "fetch":
-                    await Parser.Default.ParseArguments<FetchOptions>(args).WithParsedAsync(async o=>await prog.Fetch(o));
-                    break;
-                case "upload":
-                    await Parser.Default.ParseArguments<UploadOptions>(args).WithParsedAsync(async o=> {
-                        var creds = new BasicAWSCredentials(o.AwsId, o.AwsKey);
-                        var s3 = new AmazonS3Client(creds, RegionEndpoint.EUWest2);
-                        using var tu = new TransferUtility(s3);
-                        await prog.Upload(o,tu.UploadAsync);
-                    });
-                    break;
-            }
+                var creds = new BasicAWSCredentials(o.AwsId, o.AwsKey);
+                var s3 = new AmazonS3Client(creds, RegionEndpoint.EUWest2);
+                using var tu = new TransferUtility(s3);
+                prog.Upload(o, tu.UploadAsync).RunSynchronously();
+            });
+            return 0;
         }
     }
 }

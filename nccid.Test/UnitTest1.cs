@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions.TestingHelpers;
+using System.Threading.Tasks;
 using NUnit.Framework;
 
 namespace nccid.Test
@@ -15,7 +16,7 @@ namespace nccid.Test
             mfs = new MockFileSystem(new Dictionary<string, MockFileData>
             {
                 {
-                    @"test.csv", new MockFileData(@"CHI,Result,Date
+                    @"test.csv", new MockFileData(@"ID,Status,Date
 PAT003,1,1/1/2001
 PAT004,0,20/10/1997
 PAT023,1,26/11/1990
@@ -24,7 +25,7 @@ PAT999,0,1/3,2017
                 }
             });
             prog = new Nccidmain(mfs);
-            Nccidmain.ObjectSender p = async (body,bucket,key,ct) => { };
+            Nccidmain.ObjectSender p = async (body,bucket,key,ct) => { await Task.Delay(0); };
             prog.Upload(new UploadOptions {
                 Filename="test.csv"
             }, p).Wait();
@@ -48,7 +49,7 @@ PAT999,0,1/3,2017
         }
 
         [Test]
-        public void SearchTest()
+        public async Task SearchTest()
         {
             var po = new SearchOptions
             {
@@ -56,11 +57,11 @@ PAT999,0,1/3,2017
                 Theirport = 104,
                 Theirname = "dicomserver",
                 Ourport = 104,
-                Filename="test.csv"
+                Filename="test.csv",
+                Ourname="nccidqr"
             };
-            prog.Search(po);
+            await prog.Search(po);
             Assert.True(mfs.FileExists(po.Output));
-            System.IO.File.WriteAllText("/tmp/test.csv",mfs.File.ReadAllText(po.Output));
         }
 
         [Test]
