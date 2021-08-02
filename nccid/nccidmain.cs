@@ -94,11 +94,10 @@ namespace nccid
             await Task.Delay(0);
         }
 
-        public delegate Task ObjectSender(Stream data, string bucket, string key, CancellationToken ct);
+        public delegate void ObjectSender(Stream data, string bucket, string key);
 
         public async Task Upload(UploadOptions o,ObjectSender os)
         {
-            var ct = new CancellationToken();
             using var reader = new StreamReader(fileSystem.FileStream.Create(o.Filename,FileMode.Open));
             using var csv = new CsvReader(reader, CultureInfo.GetCultureInfo("en-GB"));
             csv.Read();
@@ -111,7 +110,7 @@ namespace nccid
                         csv.GetField("ID"));
                     var json = datum.ToJson();
                     await using var ms = new MemoryStream(json, false);
-                    await os(ms, o.bucket, datum.S3Path(o.prefix), ct);
+                    os(ms, o.bucket, datum.S3Path(o.prefix));
                     Console.WriteLine($"Uploaded CSV row {csv.Parser.Row}");
                 }
                 catch (Exception e)
@@ -124,11 +123,8 @@ namespace nccid
                 MatchCasing = MatchCasing.PlatformDefault,
 				RecurseSubdirectories = true
             };
-            var dotstrip = new Regex(@"(^|[\\/])\.[\\/]");
             foreach (var dcm in fileSystem.Directory.EnumerateFiles(".", "*.dcm", enumopts))
             {
-                // Ensure we don't send S3 any grubby DOS-style delimiters: https://github.com/jas88/nccid/issues/52
-                var _dcm = dotstrip.Replace(dcm, "/").Replace(@"\","/").Replace("//","/");
                 try
                 {
                     var attr = File.GetAttributes(dcm);
@@ -136,7 +132,7 @@ namespace nccid
                     if ((attr & FileAttributes.Archive) == FileAttributes.Archive)
                     {
                         using (var dcmstream = File.Open(dcm, FileMode.Open)) {
-                            await os(dcmstream, o.bucket, $"{o.prefix}{DateTime.Now.ToString("yyyy-MM-dd")}/images/{_dcm}", ct);
+                            os(dcmstream, o.bucket, $"{o.prefix}{DateTime.Now.ToString("yyyy-MM-dd")}/images/{Utils.SanitizePath(dcm)}");
                         }
                         attr &= ~FileAttributes.Archive;
                         File.SetAttributes(dcm, attr);
@@ -144,7 +140,7 @@ namespace nccid
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine($"Exception '{e}' uploading '{_dcm}' to '{o.prefix}{DateTime.Now.ToString("yyyy-MM-dd")}/images/{_dcm}'");
+                    Console.WriteLine($"Exception '{e}' uploading '{dcm}' to '{o.prefix}{DateTime.Now.ToString("yyyy-MM-dd")}/images/{Utils.SanitizePath(dcm)}'");
                 }
             }
         }
@@ -160,7 +156,7 @@ namespace nccid
                 var creds = new BasicAWSCredentials(o.AwsId, o.AwsKey);
                 var s3 = new AmazonS3Client(creds, RegionEndpoint.EUWest2);
                 using var tu = new TransferUtility(s3);
-                prog.Upload(o, tu.UploadAsync).RunSynchronously();
+                prog.Upload(o, tu.Upload).RunSynchronously();
             });
             return 0;
         }

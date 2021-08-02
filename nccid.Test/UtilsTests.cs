@@ -28,5 +28,14 @@ namespace nccid.Test
             Assert.AreEqual("19800224-", Utils.DicomWindow(bd, 0, 0, null));
             Assert.AreEqual("19790216-19800228", Utils.DicomWindow(bd, 1, 8, 4));
         }
+
+        [TestCase("", "")]
+        [TestCase("/foo.dcm", "foo.dcm")]
+        [TestCase(@"\dir\foo.dcm", "dir/foo.dcm")]
+        [TestCase(@"/////.//\/\///\foo.dcm", "foo.dcm")]
+        public static void SanitizePath(string from,string to)
+        {
+            Assert.AreEqual(to,Utils.SanitizePath(from));
+        }
     }
 }
