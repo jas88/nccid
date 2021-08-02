@@ -98,7 +98,6 @@ namespace nccid
 
         public async Task Upload(UploadOptions o,ObjectSender os)
         {
-            var ct = new CancellationToken();
             using var reader = new StreamReader(fileSystem.FileStream.Create(o.Filename,FileMode.Open));
             using var csv = new CsvReader(reader, CultureInfo.GetCultureInfo("en-GB"));
             csv.Read();
