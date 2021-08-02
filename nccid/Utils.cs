@@ -1,9 +1,34 @@
 using System;
+using System.Text.RegularExpressions;
 
 namespace nccid
 {
     public static class Utils
     {
+        /// <summary>
+        /// Ensure we don't send S3 any grubby DOS-style delimiters: https://github.com/jas88/nccid/issues/52
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns>Cleaned up path</returns>
+        public static string SanitizePath(string path)
+        {
+            // First, no more DOS-style slashes:
+            path = path.Replace(@"\", "/");
+
+            // No reduntant dots (/./)
+            path = path.Replace("/./", "/");
+
+            // Repeated slashes:
+            while (path.Contains("//"))
+                path = path.Replace("//", "/");
+
+            // Remove leading / if any
+            if (path.StartsWith("/"))
+                path = path.Substring(1);
+
+            return path;
+        }
+
         /// <summary>
         /// Convert a DateTime to DICOM format (20210131)
         /// </summary>

@@ -4,6 +4,11 @@
 
 https://github.com/jas88/nccid/compare/v0.0.6...main
 
+- Implement more thorough S3 object path normalisation
+- Bump AWSSDK.S3 from 3.7.1.15 to 3.7.1.19
+- Bump System.IO.Abstractions from 13.2.41 to 13.2.43
+- Bump System.IO.Abstractions.TestingHelpers from 13.2.418 to 13.2.43
+
 ## v0.0.6 2021-07-21
 
 https://github.com/jas88/nccid/compare/v0.0.5...v0.0.6

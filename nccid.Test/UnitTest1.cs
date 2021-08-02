@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions.TestingHelpers;
@@ -25,7 +26,9 @@ PAT999,0,1/3,2017
                 }
             });
             prog = new Nccidmain(mfs);
-            Nccidmain.ObjectSender p = async (body,bucket,key,ct) => { await Task.Delay(0); };
+            Nccidmain.ObjectSender p = (body,bucket,key) => {
+                Console.WriteLine($"Uploading data to {bucket}/{key}");
+            };
             prog.Upload(new UploadOptions {
                 Filename="test.csv"
             }, p).Wait();
