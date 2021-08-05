@@ -5,6 +5,20 @@ namespace nccid
 {
     public static class Utils
     {
+        private static readonly Regex yyyymmdd = new(@"^((19|20)\d{2})(\d\d)(\d\d)$");
+        public static DateTime ParseDate(string ds)
+        {
+            var digits = yyyymmdd.Match(ds);
+            if (digits.Success)
+            {
+                var y = int.Parse(digits.Groups[1].Value);
+                var m = int.Parse(digits.Groups[3].Value);
+                var d = int.Parse(digits.Groups[4].Value);
+                return new DateTime(y,m,d);
+            }
+            return DateTime.Parse(ds);
+        }
+
         /// <summary>
         /// Ensure we don't send S3 any grubby DOS-style delimiters: https://github.com/jas88/nccid/issues/52
         /// </summary>
@@ -18,13 +32,13 @@ namespace nccid
             // No reduntant dots (/./)
             path = path.Replace("/./", "/");
 
+            // Remove leading / if any
+            while (path.StartsWith("/") || path.StartsWith("."))
+                path = path.Substring(1);
+
             // Repeated slashes:
             while (path.Contains("//"))
                 path = path.Replace("//", "/");
-
-            // Remove leading / if any
-            if (path.StartsWith("/"))
-                path = path.Substring(1);
 
             return path;
         }

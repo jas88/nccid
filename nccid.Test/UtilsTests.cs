@@ -17,13 +17,13 @@ namespace nccid.Test
         internal static Encoding utf8 = Encoding.UTF8;
 
         [Test]
-        public static void DicomDate()
+        public static void DicomDateTest()
         {
             Assert.AreEqual("19800224", Utils.DicomDate(bd));
         }
 
         [Test]
-        public static void DicomWindow()
+        public static void DicomWindowTest()
         {
             Assert.AreEqual("19800224-", Utils.DicomWindow(bd, 0, 0, null));
             Assert.AreEqual("19790216-19800228", Utils.DicomWindow(bd, 1, 8, 4));
@@ -33,9 +33,15 @@ namespace nccid.Test
         [TestCase("/foo.dcm", "foo.dcm")]
         [TestCase(@"\dir\foo.dcm", "dir/foo.dcm")]
         [TestCase(@"/////.//\/\///\foo.dcm", "foo.dcm")]
-        public static void SanitizePath(string from,string to)
+        public static void SanitizePathTest(string from,string to)
         {
             Assert.AreEqual(to,Utils.SanitizePath(from));
+        }
+
+        [TestCase("20010224",2001,2,24)]
+        public static void ParseDateTest(string s,int y,int m,int d)
+        {
+            Assert.AreEqual(Utils.ParseDate(s), new DateTime(y,m,d));
         }
     }
 }

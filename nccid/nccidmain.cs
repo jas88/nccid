@@ -106,7 +106,7 @@ namespace nccid
             {
                 try
                 {
-                    var datum = INCCIDdata.Make(o.CentreName, csv.GetField<string>("Status"), csv.GetField<DateTime>("Date"),
+                    var datum = INCCIDdata.Make(o.CentreName, csv.GetField<string>("Status"), Utils.ParseDate(csv.GetField("Date")),
                         csv.GetField("ID"));
                     var json = datum.ToJson();
                     await using var ms = new MemoryStream(json, false);
@@ -116,6 +116,7 @@ namespace nccid
                 catch (Exception e)
                 {
                     Console.WriteLine($"Error '{e}' uploading JSON for '{csv.Parser.RawRecord}'");
+                    return;
                 }
             }
             var enumopts= new EnumerationOptions()
@@ -156,7 +157,7 @@ namespace nccid
                 var creds = new BasicAWSCredentials(o.AwsId, o.AwsKey);
                 var s3 = new AmazonS3Client(creds, RegionEndpoint.EUWest2);
                 using var tu = new TransferUtility(s3);
-                prog.Upload(o, tu.Upload).RunSynchronously();
+                prog.Upload(o, tu.Upload).Wait();
             });
             return 0;
         }
