@@ -2,10 +2,15 @@
 
 ## Unreleased
 
-https://github.com/jas88/nccid/compare/v0.0.6...main
+https://github.com/jas88/nccid/compare/v0.0.7...main
 
+## v0.0.7 2021-08-05
+
+https://github.com/jas88/nccid/compare/v0.0.6...v0.0.7
+
+- Refactored, more thorough unit testing, coverage reporting
 - Implement more thorough S3 object path normalisation
-- Bump AWSSDK.S3 from 3.7.1.15 to 3.7.1.19
+- Bump AWSSDK.S3 from 3.7.1.15 to 3.7.1.20
 - Bump System.IO.Abstractions from 13.2.41 to 13.2.43
 - Bump System.IO.Abstractions.TestingHelpers from 13.2.418 to 13.2.43
 
