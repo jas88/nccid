@@ -132,7 +132,7 @@ namespace nccid
                     if ((attr & FileAttributes.Archive) == FileAttributes.Archive)
                     {
                         using (var dcmstream = File.Open(dcm, FileMode.Open)) {
-                            os(dcmstream, o.bucket, $"{o.prefix}{DateTime.Now.ToString("yyyy-MM-dd")}/images/{Utils.SanitizePath(dcm)}");
+                            os(dcmstream, o.bucket, $"{o.prefix}{DateTime.Now:yyyy-MM-dd}/images/{Utils.SanitizePath(dcm)}");
                         }
                         attr &= ~FileAttributes.Archive;
                         File.SetAttributes(dcm, attr);
@@ -140,7 +140,7 @@ namespace nccid
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine($"Exception '{e}' uploading '{dcm}' to '{o.prefix}{DateTime.Now.ToString("yyyy-MM-dd")}/images/{Utils.SanitizePath(dcm)}'");
+                    Console.WriteLine($"Exception '{e}' uploading '{dcm}' to '{o.prefix}{DateTime.Now:yyyy-MM-dd}/images/{Utils.SanitizePath(dcm)}'");
                 }
             }
         }
