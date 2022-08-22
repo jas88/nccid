@@ -7,7 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="AWSSDK.S3" Version="3.7.9.40" />
+      <PackageReference Include="AWSSDK.S3" Version="3.7.9.41" />
       <PackageReference Include="CommandLineParser" Version="2.9.1" />
       <PackageReference Include="CsvHelper" Version="28.0.1" />
       <PackageReference Include="fo-dicom.NetCore" Version="4.0.8" />
