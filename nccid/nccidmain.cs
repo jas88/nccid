@@ -47,9 +47,9 @@ namespace nccid
         {
             var pacs=new DicomClient(o.Theirhost, o.Theirport, false, o.Ourname, o.Theirname);
             pacs.NegotiateAsyncOps();
-            using var reader = new StreamReader(fileSystem.FileStream.Create(o.Filename,FileMode.Open));
+            using var reader = new StreamReader(fileSystem.FileStream.New(o.Filename,FileMode.Open));
             using var csv = new CsvReader(reader, CultureInfo.GetCultureInfo("en-GB"));
-            using var writer = new StreamWriter(fileSystem.FileStream.Create(o.Output, FileMode.Create));
+            using var writer = new StreamWriter(fileSystem.FileStream.New(o.Output, FileMode.Create));
             using var csvout = new CsvWriter(writer, CultureInfo.InvariantCulture);
             csvout.WriteHeader<FetchItem>();
             csvout.NextRecord();
@@ -88,7 +88,7 @@ namespace nccid
         {
             var pacs=new DicomClient(o.Theirhost, o.Theirport, false, o.Ourname, o.Theirname);
             pacs.NegotiateAsyncOps();
-            //using var reader = new StreamReader(fileSystem.FileStream.Create(o.Filename,FileMode.Open));
+            //using var reader = new StreamReader(fileSystem.FileStream.New(o.Filename,FileMode.Open));
             //using var csv = new CsvReader(reader, CultureInfo.GetCultureInfo("en-GB"));
             // TODO: Complete PACS fetch code.
             await Task.Delay(0);
@@ -98,7 +98,7 @@ namespace nccid
 
         public async Task Upload(UploadOptions o,ObjectSender os)
         {
-            using var reader = new StreamReader(fileSystem.FileStream.Create(o.Filename,FileMode.Open));
+            using var reader = new StreamReader(fileSystem.FileStream.New(o.Filename,FileMode.Open));
             using var csv = new CsvReader(reader, CultureInfo.GetCultureInfo("en-GB"));
             csv.Read();
             csv.ReadHeader();
