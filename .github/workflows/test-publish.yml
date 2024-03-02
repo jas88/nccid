@@ -17,7 +17,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-nuget-
     - name: Check out code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
     - name: Install .Net 8
       uses: actions/setup-dotnet@v2
       with:
