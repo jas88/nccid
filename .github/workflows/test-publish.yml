@@ -18,10 +18,10 @@ jobs:
           ${{ runner.os }}-nuget-
     - name: Check out code
       uses: actions/checkout@v2
-    - name: Install .Net 6
+    - name: Install .Net 8
       uses: actions/setup-dotnet@v2
       with:
-        dotnet-version: '6.0.x'
+        dotnet-version: '8.0.x'
     - name : Test
       run: |
         dotnet test --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=lcov
