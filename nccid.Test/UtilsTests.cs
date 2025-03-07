@@ -19,14 +19,17 @@ namespace nccid.Test
         [Test]
         public static void DicomDateTest()
         {
-            Assert.AreEqual("19800224", Utils.DicomDate(bd));
+            Assert.That(Utils.DicomDate(Bd), Is.EqualTo("19800224"));
         }
 
         [Test]
         public static void DicomWindowTest()
         {
-            Assert.AreEqual("19800224-", Utils.DicomWindow(bd, 0, 0, null));
-            Assert.AreEqual("19790216-19800228", Utils.DicomWindow(bd, 1, 8, 4));
+          Assert.Multiple(static () =>
+          {
+              Assert.That(Utils.DicomWindow(Bd, 0, 0, null), Is.EqualTo("19800224-"));
+              Assert.That(Utils.DicomWindow(Bd, 1, 8, 4), Is.EqualTo("19790216-19800228"));
+          });
         }
 
         [TestCase("", "")]
@@ -35,7 +38,7 @@ namespace nccid.Test
         [TestCase(@"/////.//\/\///\foo.dcm", "foo.dcm")]
         public static void SanitizePathTest(string from,string to)
         {
-            Assert.AreEqual(to,Utils.SanitizePath(from));
+            Assert.That(Utils.SanitizePath(from), Is.EqualTo(to));
         }
 
         [TestCase("20010224",2001,2,24)]
@@ -43,5 +46,14 @@ namespace nccid.Test
         {
             Assert.AreEqual(Utils.ParseDate(s), new DateTime(y,m,d));
         }
+    }
+
+    [TestCase("", "")]
+    [TestCase("/foo.dcm", "foo.dcm")]
+    [TestCase(@"\dir\foo.dcm", "dir/foo.dcm")]
+    [TestCase(@"/////.//\/\///\foo.dcm", "foo.dcm")]
+    public static void SanitizePath(string from,string to)
+    {
+      // TODO
     }
 }

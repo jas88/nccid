@@ -9,13 +9,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - name : coverlet
+    - name: Cache Nuget
+      uses: actions/cache@v4
+      with:
+        path: ${{ github.workspace }}/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+    - name: Check out code
+      uses: actions/checkout@v4
+    - name: Install .Net 8
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+    - name : Test
       run: |
         dotnet test --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=lcov
         mv nccid.Test/TestResults/*/coverage.info lcov.info
-    - name: coveralls      
-      uses: coverallsapp/github-action@v1.1.1
+    - name: Report coverage to Coveralls
+      uses: coverallsapp/github-action@v2.3.6
       with:
         github-token: ${{secrets.GITHUB_TOKEN }} 
         path-to-lcov: 'lcov.info'

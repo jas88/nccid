@@ -1,10 +1,9 @@
 using System;
-using System.Text.RegularExpressions;
 
-namespace nccid
+namespace nccid;
+
+public static class Utils
 {
-    public static class Utils
-    {
         private static readonly Regex yyyymmdd = new(@"^((19|20)\d{2})(\d\d)(\d\d)$");
         public static DateTime ParseDate(string ds)
         {
@@ -43,24 +42,22 @@ namespace nccid
             return path;
         }
 
-        /// <summary>
-        /// Convert a DateTime to DICOM format (20210131)
-        /// </summary>
-        /// <param name="t">Date to convert</param>
-        /// <returns>Date in DICOM format</returns>
-        public static string DicomDate(DateTime t) => t.ToString("yyyyMMdd");
+    /// <summary>
+    /// Convert a DateTime to DICOM format (20210131)
+    /// </summary>
+    /// <param name="t">Date to convert</param>
+    /// <returns>Date in DICOM format</returns>
+    public static string DicomDate(DateTime t) => t.ToString("yyyyMMdd");
 
-        /// <summary>
-        /// Generate an asymmetric DICOM date range either side of a date
-        /// </summary>
-        /// <param name="t">Date to use as basis</param>
-        /// <param name="preyears">Years before date</param>
-        /// <param name="pre">Days before date</param>
-        /// <param name="post">Days after date, or null to cover all dates after t</param>
-        /// <returns></returns>
-        public static string DicomWindow(DateTime t, int preyears, int pre, int? post)
-            => $"{DicomDate(t.AddYears(-preyears).AddDays(-pre))}-{(post.HasValue ? DicomDate(t.AddDays(post.Value)) : "")}";
-
-    }
+    /// <summary>
+    /// Generate an asymmetric DICOM date range either side of a date
+    /// </summary>
+    /// <param name="t">Date to use as basis</param>
+    /// <param name="preyears">Years before date</param>
+    /// <param name="pre">Days before date</param>
+    /// <param name="post">Days after date, or null to cover all dates after t</param>
+    /// <returns></returns>
+    public static string DicomWindow(DateTime t, int preyears, int pre, int? post)
+        => $"{DicomDate(t.AddYears(-preyears).AddDays(-pre))}-{(post.HasValue ? DicomDate(t.AddDays(post.Value)) : "")}";
 
 }
