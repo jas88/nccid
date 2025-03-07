@@ -26,12 +26,12 @@ public abstract record NccidData
         var pos = pcrpos[0] switch
         {
             '0' => false,
-            'n' => pcrpos.Equals("negative", StringComparison.OrdinalIgnoreCase) ? false : throw new ArgumentException($"Invalid PCR test result '{pcrpos}'"),
-            'N' => pcrpos.Equals("negative", StringComparison.OrdinalIgnoreCase) ? false : throw new ArgumentException($"Invalid PCR test result '{pcrpos}'"),
+            'n' => !pcrpos.Equals("negative", StringComparison.OrdinalIgnoreCase) && throw new ArgumentException($"Invalid PCR test result '{pcrpos}'"),
+            'N' => !pcrpos.Equals("negative", StringComparison.OrdinalIgnoreCase) && throw new ArgumentException($"Invalid PCR test result '{pcrpos}'"),
 
             '1' => true,
-            'p' => pcrpos.Equals("positive", StringComparison.OrdinalIgnoreCase) ? true : throw new ArgumentException($"Invalid PCR test result '{pcrpos}'"),
-            'P' => pcrpos.Equals("positive", StringComparison.OrdinalIgnoreCase) ? true : throw new ArgumentException($"Invalid PCR test result '{pcrpos}'"),
+            'p' => !pcrpos.Equals("positive", StringComparison.OrdinalIgnoreCase) && throw new ArgumentException($"Invalid PCR test result '{pcrpos}'"),
+            'P' => !pcrpos.Equals("positive", StringComparison.OrdinalIgnoreCase) && throw new ArgumentException($"Invalid PCR test result '{pcrpos}'"),
 
             _ => throw new ArgumentException($"Invalid PCR test result '{pcrpos}'")
         };
