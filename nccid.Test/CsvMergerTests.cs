@@ -19,7 +19,7 @@ public static class CsvMergerTests
     [Test]
     public static void CsvMerger()
     {
-        CsvMerger testSet = new("testid", "testcsv", Mfs, (List<string>)[Path.Combine(Root, "testcsv", "excluded.csv")]);
+        CsvMerger testSet = new("testid", "testcsv", Mfs, [Path.Combine(Root, "testcsv", "excluded.csv")]);
         Assert.Multiple(() =>
         {
             Assert.That(testSet.TryGetValue("test1", out var datum), "Found data for test1");
