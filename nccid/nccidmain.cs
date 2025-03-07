@@ -91,7 +91,7 @@ public sealed class Nccidmain
         {
             try
             {
-                var datum = INCCIDdata.Make(o.CentreName, csv.GetField<string>("Status"), csv.GetField<DateTime>("Date"),
+                var datum = INCCIDdata.Make(o.CentreName, csv.GetField<string>("Status"), Utils.ParseDate(csv.GetField("Date")),
                     csv.GetField("ID"));
                 var json = datum.ToJson();
                 await using var ms = new MemoryStream(json, false);
@@ -142,7 +142,7 @@ public sealed class Nccidmain
                 var creds = new BasicAWSCredentials(o.AwsId, o.AwsKey);
                 var s3 = new AmazonS3Client(creds, RegionEndpoint.EUWest2);
                 using var tu = new TransferUtility(s3);
-                prog.Upload(o, tu.Upload).RunSynchronously();
+                prog.Upload(o, tu.Upload).Wait();
             });
         return 0;
     }

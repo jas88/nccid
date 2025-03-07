@@ -6,6 +6,11 @@ namespace nccid.Test;
 
 public static class DataTests
 {
+    /// <summary>
+    /// Arbitrary date to use in testing
+    /// </summary>
+    internal static readonly DateTime Bd = new(1980, 2, 24);
+
     [Test]
     public static void PositiveData()
     {
@@ -36,6 +41,6 @@ public static class DataTests
     [Test]
     public static void AmbiguousThrows()
     {
-        Assert.Throws<ArgumentException>(() => { _ = INCCIDdata.Make("", "blah", DateTime.Now, ""); } );
+        Assert.Throws<ArgumentException>(() => { _ = INCCIDdata.Make("", "blah", DateTime.Now, ""); });
     }
 }
