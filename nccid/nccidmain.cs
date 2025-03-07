@@ -1,56 +1,46 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
+﻿using System.Globalization;
 using System.IO.Abstractions;
 using System.Text.Json;
-using System.Threading.Tasks;
 using Amazon;
 using Amazon.Runtime;
 using Amazon.S3;
 using Amazon.S3.Transfer;
 using CommandLine;
 using CsvHelper;
-using Dicom;
-using Dicom.Network;
-using DicomClient=Dicom.Network.Client.DicomClient;
+using FellowOakDicom;
+using FellowOakDicom.Network;
+using FellowOakDicom.Network.Client;
+using JetBrains.Annotations;
 
 namespace nccid;
 
-public sealed class Nccidmain
+public sealed class Nccidmain(IFileSystem fileSystem)
 {
-    private readonly IFileSystem _fileSystem;
-
-    public Nccidmain(IFileSystem fileSystem)
-    {
-        _fileSystem = fileSystem;
-    }
-
-    public sealed record FetchItem(string Chi, bool Covid, string Window);
+    private sealed record FetchItem([UsedImplicitly] string Chi, bool Covid, string Window);
 
     public async Task Search(SearchOptions o)
     {
-        var pacs=new DicomClient(o.Theirhost, o.Theirport, false, o.Ourname, o.Theirname);
+        var pacs = DicomClientFactory.Create(o.Theirhost, o.Theirport, false, o.Ourname, o.Theirname);
         pacs.NegotiateAsyncOps();
-        using var reader = new StreamReader(_fileSystem.FileStream.New(o.Filename,FileMode.Open));
+        using var reader = new StreamReader(fileSystem.FileStream.New(o.Filename, FileMode.Open));
         using var csv = new CsvReader(reader, CultureInfo.GetCultureInfo("en-GB"));
-        await using var writer = new StreamWriter(_fileSystem.FileStream.New(o.Output, FileMode.Create));
+        await using var writer = new StreamWriter(fileSystem.FileStream.New(o.Output, FileMode.Create));
         await using var csvout = new CsvWriter(writer, CultureInfo.InvariantCulture);
         csvout.WriteHeader<FetchItem>();
-        csvout.NextRecord();
-        csv.Read();
+        await csvout.NextRecordAsync();
+        await csv.ReadAsync();
         csv.ReadHeader();
-        while (csv.Read())
+        while (await csv.ReadAsync())
         {
             var studies = new List<string>();
-            var pt = INCCIDdata.Make("Dummy centre name", csv.GetField<string>("Status"), csv.GetField<DateTime>("Date"),
-                csv.GetField("ID"));
-            var req=new DicomCFindRequest(DicomQueryRetrieveLevel.Study);
+            var pt = NccidData.Make("Dummy centre name", csv.GetField<string>("Status"), csv.GetField<DateTime>("Date"),
+                csv.GetField("ID") ?? throw new InvalidOperationException());
+            var req = new DicomCFindRequest(DicomQueryRetrieveLevel.Study);
             req.Dataset.AddOrUpdate(new DicomTag(0x8, 0x5), "ISO_IR 192");
-            req.Dataset.AddOrUpdate(DicomTag.StudyDate, Utils.DicomWindow(pt.when,0,21,21));
+            req.Dataset.AddOrUpdate(DicomTag.StudyDate, Utils.DicomWindow(pt.DtWhen, 0, 21, 21));
             req.Dataset.AddOrUpdate(DicomTag.PatientID, pt.Pseudonym);
             req.Dataset.AddOrUpdate(DicomTag.StudyInstanceUID, "");
-            req.OnResponseReceived += (req, resp) =>
+            req.OnResponseReceived += (_, resp) =>
             {
                 var uid = resp.Dataset?.GetSingleValue<string>(DicomTag.StudyInstanceUID);
                 if (uid != null)
@@ -61,17 +51,19 @@ public sealed class Nccidmain
             //swabs.Add(pt);
             if (studies.Count > 0)
             {
-                csvout.WriteRecord(new FetchItem(pt.Pseudonym,pt is PositiveData,pt.When));
-                csvout.NextRecord();
+                csvout.WriteRecord(new FetchItem(pt.Pseudonym, pt is PositiveData, pt.SpecialFormatTimestamp));
+                await csvout.NextRecordAsync();
             }
+
             Console.WriteLine(JsonSerializer.Serialize(pt));
         }
+
         await csvout.FlushAsync();
     }
 
     private static Task Fetch(FetchOptions o)
     {
-        var pacs=new DicomClient(o.Theirhost, o.Theirport, false, o.Ourname, o.Theirname);
+        var pacs = DicomClientFactory.Create(o.Theirhost, o.Theirport, false, o.Ourname, o.Theirname);
         pacs.NegotiateAsyncOps();
         //using var reader = new StreamReader(fileSystem.FileStream.New(o.Filename,FileMode.Open));
         //using var csv = new CsvReader(reader, CultureInfo.GetCultureInfo("en-GB"));
@@ -81,21 +73,21 @@ public sealed class Nccidmain
 
     public delegate void ObjectSender(Stream data, string bucket, string key);
 
-    public async Task Upload(UploadOptions o,ObjectSender os)
+    public async Task Upload(UploadOptions o, ObjectSender os)
     {
-        using var reader = new StreamReader(_fileSystem.FileStream.New(o.Filename,FileMode.Open));
+        using var reader = new StreamReader(fileSystem.FileStream.New(o.Filename, FileMode.Open));
         using var csv = new CsvReader(reader, CultureInfo.GetCultureInfo("en-GB"));
-        csv.Read();
+        await csv.ReadAsync();
         csv.ReadHeader();
-        while (csv.Read())
+        while (await csv.ReadAsync())
         {
             try
             {
-                var datum = INCCIDdata.Make(o.CentreName, csv.GetField<string>("Status"), Utils.ParseDate(csv.GetField("Date")),
-                    csv.GetField("ID"));
+                var datum = NccidData.Make(o.CentreName, csv.GetField<string>("Status"), Utils.ParseDate(csv.GetField("Date") ?? string.Empty),
+                    csv.GetField("ID") ?? throw new InvalidOperationException());
                 var json = datum.ToJson();
                 await using var ms = new MemoryStream(json, false);
-                os(ms, o.bucket, datum.S3Path(o.prefix));
+                os(ms, o.Bucket, datum.S3Path(o.Prefix));
                 Console.WriteLine($"Uploaded CSV row {csv.Parser.Row}");
             }
             catch (Exception e)
@@ -103,12 +95,13 @@ public sealed class Nccidmain
                 Console.WriteLine($"Error '{e}' uploading JSON for '{csv.Parser.RawRecord}'");
             }
         }
-        var enumopts= new EnumerationOptions()
+
+        var enumopts = new EnumerationOptions
         {
             MatchCasing = MatchCasing.PlatformDefault,
             RecurseSubdirectories = true
         };
-        foreach (var dcm in _fileSystem.Directory.EnumerateFiles(".", "*.dcm", enumopts))
+        foreach (var dcm in fileSystem.Directory.EnumerateFiles(".", "*.dcm", enumopts))
         {
             try
             {
@@ -119,14 +112,15 @@ public sealed class Nccidmain
                 var dcmstream = File.Open(dcm, FileMode.Open);
                 await using (dcmstream.ConfigureAwait(false))
                 {
-                    os(dcmstream, o.bucket, $"{o.prefix}{DateTime.Now:yyyy-MM-dd}/images/{Utils.SanitizePath(dcm)}");
+                    os(dcmstream, o.Bucket, $"{o.Prefix}{DateTime.Now:yyyy-MM-dd}/images/{Utils.SanitizePath(dcm)}");
                 }
+
                 attr &= ~FileAttributes.Archive;
                 File.SetAttributes(dcm, attr);
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Exception '{e}' uploading '{dcm}' to '{o.prefix}{DateTime.Now:yyyy-MM-dd}/images/{Utils.SanitizePath(dcm)}'");
+                Console.WriteLine($"Exception '{e}' uploading '{dcm}' to '{o.Prefix}{DateTime.Now:yyyy-MM-dd}/images/{Utils.SanitizePath(dcm)}'");
             }
         }
     }

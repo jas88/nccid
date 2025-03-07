@@ -1,85 +1,85 @@
-using System;
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using JetBrains.Annotations;
 
 namespace nccid;
 
-public abstract class INCCIDdata
+public abstract record NccidData
 {
     public string Pseudonym { get; }
-    public readonly DateTime when;
-    public string SubmittingCentre { get; }
+    internal readonly DateTime DtWhen;
+    public string SubmittingCentre { [UsedImplicitly] get; }
 
-    protected INCCIDdata(string cn, DateTime when,string pn)
+    protected NccidData(string cn, DateTime DtWhen, string pn)
     {
         SubmittingCentre = cn;
         Pseudonym = pn;
-        this.when = when;
+        this.DtWhen = DtWhen;
     }
 
-    public static INCCIDdata Make(string centreName, string pcrpos,DateTime _when,string _pn)
+    public static NccidData Make(string centreName, ReadOnlySpan<char> pcrpos, DateTime when, string pn)
     {
-        var pos = pcrpos.ToLowerInvariant() switch
-        {
-            "0" => false,
-            "negative" => false,
+        if (pcrpos.Length == 0)
+            throw new ArgumentException($"Invalid PCR test result '{pcrpos}'");
 
-            "1" => true,
-            "positive" => true,
+        var pos = pcrpos[0] switch
+        {
+            '0' => false,
+            'n' when pcrpos.Equals("negative", StringComparison.OrdinalIgnoreCase) => false,
+            'N' when pcrpos.Equals("negative", StringComparison.OrdinalIgnoreCase) => false,
+
+            '1' => true,
+            'p' when pcrpos.Equals("positive", StringComparison.OrdinalIgnoreCase) => true,
+            'P' when pcrpos.Equals("positive", StringComparison.OrdinalIgnoreCase) => true,
 
             _ => throw new ArgumentException($"Invalid PCR test result '{pcrpos}'")
         };
-        return pos ? new PositiveData(centreName, _when, _pn) : new NegativeData(centreName, _when, _pn);
+        return pos ? new PositiveData(centreName, when, pn) : new NegativeData(centreName, when, pn);
     }
 
     [JsonIgnore]
-    public abstract string When { get; }
+    public abstract string SpecialFormatTimestamp { get; }
 
     public abstract byte[] ToJson();
     public abstract string S3Path(string prefix);
 }
 
-public class PositiveData : INCCIDdata
+public sealed record PositiveData : NccidData
 {
     [JsonPropertyName("Date of Positive Covid Swab")]
-    public string SwabDate => when.ToString("MM/dd/yyyy");
+    [UsedImplicitly]
+    public string SwabDate => DtWhen.ToString("MM/dd/yyyy", CultureInfo.InvariantCulture);
 
-    public override string When => Utils.DicomWindow(when, 3, when.DayOfYear, null);
+    public override string SpecialFormatTimestamp => Utils.DicomWindow(DtWhen, 3, DtWhen.DayOfYear, null);
 
-    public override byte[] ToJson()
-    {
-        return JsonSerializer.SerializeToUtf8Bytes(this);
-    }
+    public override byte[] ToJson() => JsonSerializer.SerializeToUtf8Bytes(this);
 
-    public override string S3Path(string prefix)
-    {
-        return $"{prefix}{DateTime.Now:yyyy-MM-dd}/data/{Pseudonym}_data.json";
-    }
+    public override string S3Path(string prefix) => $"{prefix}{DateTime.Now:yyyy-MM-dd}/data/{Pseudonym}_data.json";
 
-    public PositiveData(string centreName, DateTime when,string pn) : base(centreName,when,pn)
+    public PositiveData(string centreName, DateTime DtWhen, string pn) : base(centreName, DtWhen, pn)
     {
     }
 }
 
-public class NegativeData : INCCIDdata
+public sealed record NegativeData : NccidData
 {
-    public int SwabStatus { get; } = 0;
-    public string SwabDate => base.when.ToString("dd/MM/yyyy");
+#pragma warning disable IDE0079 // yes, the suppression is marked as erroneous so suppress the erroneous suppression warning...
+    [UsedImplicitly]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>")]
+    public int SwabStatus => 0;
+#pragma warning restore IDE0079
+
+    [UsedImplicitly] public string SwabDate => DtWhen.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
 
     // ? 21 days of PCR test
-    public override string When => $"{when.AddDays(-21):yyyyMMdd}-{when.AddDays(21):yyyyMMdd}";
+    public override string SpecialFormatTimestamp => $"{DtWhen.AddDays(-21):yyyyMMdd}-{DtWhen.AddDays(21):yyyyMMdd}";
 
-    public override byte[] ToJson()
-    {
-        return JsonSerializer.SerializeToUtf8Bytes(this);
-    }
+    public override byte[] ToJson() => JsonSerializer.SerializeToUtf8Bytes(this);
 
-    public override string S3Path(string prefix)
-    {
-        return $"{prefix}{DateTime.Now:yyyy-MM-dd}/data/{Pseudonym}_status.json";
-    }
+    public override string S3Path(string prefix) => $"{prefix}{DateTime.Now:yyyy-MM-dd}/data/{Pseudonym}_status.json";
 
-    public NegativeData(string centreName, DateTime when,string pn) : base(centreName,when,pn)
+    public NegativeData(string centreName, DateTime DtWhen, string pn) : base(centreName, DtWhen, pn)
     {
     }
 }

@@ -1,8 +1,20 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35825.156
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nccid", "nccid\nccid.csproj", "{751A4447-B2F6-4596-8550-28201251356A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nccid.Test", "nccid.Test\nccid.Test.csproj", "{00FBCA52-D210-4179-A10E-B28923DBADE1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
+	ProjectSection(SolutionItems) = preProject
+		build.sh = build.sh
+		.github\dependabot.yml = .github\dependabot.yml
+		Directory.Build.props = Directory.Build.props
+		global.json = global.json
+		.github\workflows\test-publish.yml = .github\workflows\test-publish.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,5 +30,11 @@ Global
 		{00FBCA52-D210-4179-A10E-B28923DBADE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{00FBCA52-D210-4179-A10E-B28923DBADE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{00FBCA52-D210-4179-A10E-B28923DBADE1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1138412A-6F81-481A-A153-B4FAC45C2890}
 	EndGlobalSection
 EndGlobal

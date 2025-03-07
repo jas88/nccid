@@ -1,22 +1,21 @@
-using System;
+using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace nccid;
 
-public static class Utils
+public static partial class Utils
 {
-    private static readonly Regex yyyymmdd = new(@"^((19|20)\d{2})(\d\d)(\d\d)$");
+    private static readonly Regex YearMonthDay = YearMonthDayRegex();
+
     public static DateTime ParseDate(string ds)
     {
-        var digits = yyyymmdd.Match(ds);
-        if (digits.Success)
-        {
-            var y = int.Parse(digits.Groups[1].Value);
-            var m = int.Parse(digits.Groups[3].Value);
-            var d = int.Parse(digits.Groups[4].Value);
-            return new DateTime(y, m, d);
-        }
-        return DateTime.Parse(ds);
+        var digits = YearMonthDay.Match(ds);
+        if (!digits.Success) return DateTime.Parse(ds, CultureInfo.InvariantCulture);
+
+        var y = int.Parse(digits.Groups[1].Value, CultureInfo.InvariantCulture);
+        var m = int.Parse(digits.Groups[3].Value, CultureInfo.InvariantCulture);
+        var d = int.Parse(digits.Groups[4].Value, CultureInfo.InvariantCulture);
+        return new DateTime(y, m, d);
     }
 
     /// <summary>
@@ -48,7 +47,7 @@ public static class Utils
     /// </summary>
     /// <param name="t">Date to convert</param>
     /// <returns>Date in DICOM format</returns>
-    public static string DicomDate(DateTime t) => t.ToString("yyyyMMdd");
+    public static string DicomDate(DateTime t) => t.ToString("yyyyMMdd", CultureInfo.InvariantCulture);
 
     /// <summary>
     /// Generate an asymmetric DICOM date range either side of a date
@@ -61,4 +60,6 @@ public static class Utils
     public static string DicomWindow(DateTime t, int preyears, int pre, int? post)
         => $"{DicomDate(t.AddYears(-preyears).AddDays(-pre))}-{(post.HasValue ? DicomDate(t.AddDays(post.Value)) : "")}";
 
+    [GeneratedRegex(@"^((19|20)\d{2})(\d\d)(\d\d)$", RegexOptions.CultureInvariant)]
+    private static partial Regex YearMonthDayRegex();
 }

@@ -18,14 +18,21 @@ jobs:
           ${{ runner.os }}-nuget-
     - name: Check out code
       uses: actions/checkout@v4
-    - name: Install .Net 8
+    - name: Install .Net
       uses: actions/setup-dotnet@v4
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
       with:
-        dotnet-version: '8.0.x'
+        languages: "csharp"
+        queries: +security-and-quality
     - name : Test
       run: |
         dotnet test --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=lcov
         mv nccid.Test/TestResults/*/coverage.info lcov.info
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+          category: "/language:csharp"
     - name: Report coverage to Coveralls
       uses: coverallsapp/github-action@v2.3.6
       with:
