@@ -26,8 +26,8 @@ public abstract record NccidData
         var pos = pcrpos[0] switch
         {
             '0' => false,
-            'n' when !pcrpos.Equals("negative", StringComparison.OrdinalIgnoreCase) => false,
-            'N' when !pcrpos.Equals("negative", StringComparison.OrdinalIgnoreCase) => false,
+            'n' when pcrpos.Equals("negative", StringComparison.OrdinalIgnoreCase) => false,
+            'N' when pcrpos.Equals("negative", StringComparison.OrdinalIgnoreCase) => false,
 
             '1' => true,
             'p' when pcrpos.Equals("positive", StringComparison.OrdinalIgnoreCase) => true,

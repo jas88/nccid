@@ -24,7 +24,7 @@ public static class CsvMergerTests
         {
             Assert.That(testSet.TryGetValue("test1", out var datum), "Found data for test1");
             Assert.That(testSet.ContainsKey("test2"), Is.False, "Must not read data from other directories");
-            Assert.That(datum, new DictionaryContainsKeyValuePairConstraint("cola", datum));
+            Assert.That(datum, new DictionaryContainsKeyValuePairConstraint("cola", "datum1"));
             Assert.That(datum, Does.Not.ContainKey("colc"), "Data from excluded file");
         });
     }
