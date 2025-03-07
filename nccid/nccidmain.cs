@@ -33,7 +33,7 @@ public sealed class Nccidmain(IFileSystem fileSystem)
         while (await csv.ReadAsync())
         {
             var studies = new List<string>();
-            var pt = INCCIDdata.Make("Dummy centre name", csv.GetField<string>("Status"), csv.GetField<DateTime>("Date"),
+            var pt = NccidData.Make("Dummy centre name", csv.GetField<string>("Status"), csv.GetField<DateTime>("Date"),
                 csv.GetField("ID") ?? throw new InvalidOperationException());
             var req = new DicomCFindRequest(DicomQueryRetrieveLevel.Study);
             req.Dataset.AddOrUpdate(new DicomTag(0x8, 0x5), "ISO_IR 192");
@@ -83,7 +83,7 @@ public sealed class Nccidmain(IFileSystem fileSystem)
         {
             try
             {
-                var datum = INCCIDdata.Make(o.CentreName, csv.GetField<string>("Status"), Utils.ParseDate(csv.GetField("Date") ?? string.Empty),
+                var datum = NccidData.Make(o.CentreName, csv.GetField<string>("Status"), Utils.ParseDate(csv.GetField("Date") ?? string.Empty),
                     csv.GetField("ID") ?? throw new InvalidOperationException());
                 var json = datum.ToJson();
                 await using var ms = new MemoryStream(json, false);
