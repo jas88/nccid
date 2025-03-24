@@ -1,4 +1,4 @@
-﻿<!--EXTERNAL_PROPERTIES: NETCoreAppMaximumVersion-->
+<!--EXTERNAL_PROPERTIES: NETCoreAppMaximumVersion-->
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
@@ -10,7 +10,7 @@
 		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
 			<_Parameter1>nccid.Test</_Parameter1>
 		</AssemblyAttribute>
-		<PackageReference Include="AWSSDK.S3" Version="3.7.415.18" />
+		<PackageReference Include="AWSSDK.S3" Version="3.7.415.23" />
 		<PackageReference Include="CommandLineParser" Version="2.9.1" />
 		<PackageReference Include="CsvHelper" Version="33.0.1" />
 		<PackageReference Include="fo-dicom" Version="5.2.1" />
