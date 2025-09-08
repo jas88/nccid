@@ -19,7 +19,7 @@ jobs:
     - name: Check out code
       uses: actions/checkout@v5
     - name: Install .Net
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v3
       if: startsWith(github.event_name, 'pull_request')
