@@ -17,7 +17,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-nuget-
     - name: Check out code
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
     - name: Install .Net
       uses: actions/setup-dotnet@v5
     - name: Initialize CodeQL
