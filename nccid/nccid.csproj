@@ -10,7 +10,7 @@
 		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
 			<_Parameter1>nccid.Test</_Parameter1>
 		</AssemblyAttribute>
-		<PackageReference Include="AWSSDK.S3" Version="4.0.16.2" />
+		<PackageReference Include="AWSSDK.S3" Version="4.0.17" />
 		<PackageReference Include="CommandLineParser" Version="2.9.1" />
 		<PackageReference Include="CsvHelper" Version="33.1.0" />
 		<PackageReference Include="fo-dicom" Version="5.2.5" />
