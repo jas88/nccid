@@ -1,14 +1,12 @@
-﻿
 <Project>
-	<PropertyGroup>
-		<Version>0.0.6</Version>
-		<AnalysisMode>Recommended</AnalysisMode>
-		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
-		<PublishRepositoryUrl>true</PublishRepositoryUrl>
-		<IncludeSymbols>true</IncludeSymbols>
-		<LangVersion>latest</LangVersion>
-		<Nullable>enable</Nullable>
-		<LangVersion>latest</LangVersion>
-		<ImplicitUsings>enable</ImplicitUsings>
-	</PropertyGroup>
+  <Import Project="build-standards/Directory.Build.props.executable-repo" />
+  <Import Project="build-standards/Directory.Build.props.shared" />
+
+  <PropertyGroup>
+    <MinVerMinimumMajorMinor>0.0</MinVerMinimumMajorMinor>
+    <Product>nccid</Product>
+    <Description>Tooling for the National Covid-19 Chest Imaging Database</Description>
+    <PackageProjectUrl>https://github.com/jas88/nccid</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/jas88/nccid</RepositoryUrl>
+  </PropertyGroup>
 </Project>
