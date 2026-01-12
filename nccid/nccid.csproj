@@ -1,21 +1,25 @@
-<!--EXTERNAL_PROPERTIES: NETCoreAppMaximumVersion-->
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<TargetFramework>net$(NETCoreAppMaximumVersion)</TargetFramework>
+		<!-- Disable AOT/trimming - uses reflection-based JSON serialization -->
+		<IsAotCompatible>false</IsAotCompatible>
+		<IsTrimmable>false</IsTrimmable>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-			<_Parameter1>nccid.Test</_Parameter1>
+			<_Parameter1>nccid.Tests</_Parameter1>
 		</AssemblyAttribute>
-		<PackageReference Include="AWSSDK.S3" Version="4.0.17" />
-		<PackageReference Include="CommandLineParser" Version="2.9.1" />
-		<PackageReference Include="CsvHelper" Version="33.1.0" />
-		<PackageReference Include="fo-dicom" Version="5.2.5" />
-		<PackageReference Include="JetBrains.Annotations" Version="2025.2.4" />
-		<PackageReference Include="System.IO.Abstractions" Version="22.1.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="AWSSDK.S3" />
+		<PackageReference Include="CommandLineParser" />
+		<PackageReference Include="CsvHelper" />
+		<PackageReference Include="fo-dicom" />
+		<PackageReference Include="JetBrains.Annotations" />
+		<PackageReference Include="System.IO.Abstractions" />
 	</ItemGroup>
 
 </Project>

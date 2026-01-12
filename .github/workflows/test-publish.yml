@@ -1,7 +1,11 @@
 name: Test and publish
 
 on:
-  ["push","pull_request"]
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
 
 jobs:
   build:
@@ -11,6 +15,8 @@ jobs:
     steps:
     - name: Check out code
       uses: actions/checkout@v6
+      with:
+        submodules: recursive
     - name: Install .Net
       uses: actions/setup-dotnet@v5
       with:
@@ -26,7 +32,7 @@ jobs:
     - name : Test
       run: |
         dotnet test --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=lcov
-        mv nccid.Test/TestResults/*/coverage.info lcov.info
+        cp nccid.Tests/TestResults/*/coverage.info lcov.info
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v4
       if: startsWith(github.event_name, 'pull_request')
@@ -36,7 +42,7 @@ jobs:
       uses: coverallsapp/github-action@v2.3.7
       if: startsWith(github.event_name, 'pull_request')
       with:
-        github-token: ${{secrets.GITHUB_TOKEN }} 
+        github-token: ${{secrets.GITHUB_TOKEN }}
         path-to-lcov: 'lcov.info'
     - name: Build
       run: ./build.sh
