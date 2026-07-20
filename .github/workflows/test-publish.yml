@@ -18,7 +18,7 @@ jobs:
       with:
         submodules: recursive
     - name: Install .Net
-      uses: actions/setup-dotnet@v5
+      uses: actions/setup-dotnet@v6
       with:
         global-json-file: global.json
         cache: true
