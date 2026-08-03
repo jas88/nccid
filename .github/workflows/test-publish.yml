@@ -39,7 +39,7 @@ jobs:
       with:
           category: "/language:csharp"
     - name: Report coverage to Coveralls
-      uses: coverallsapp/github-action@v2.3.7
+      uses: coverallsapp/github-action@v2.3.8
       if: startsWith(github.event_name, 'pull_request')
       with:
         github-token: ${{secrets.GITHUB_TOKEN }}
