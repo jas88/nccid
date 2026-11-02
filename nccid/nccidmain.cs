@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using System.IO.Abstractions;
+﻿using System.IO.Abstractions;
 using System.Text.Json;
 using Amazon;
 using Amazon.Runtime;
@@ -14,27 +13,25 @@ using JetBrains.Annotations;
 
 namespace nccid;
 
-public sealed class Nccidmain(IFileSystem fileSystem)
+public sealed partial class Nccidmain(IFileSystem fileSystem)
 {
-    private sealed record FetchItem([UsedImplicitly] string Chi, bool Covid, string Window);
+    [CsvRecord]
+    internal sealed partial record FetchItem([UsedImplicitly] string Chi, bool Covid, string Window);
 
     public async Task Search(SearchOptions o)
     {
         var pacs = DicomClientFactory.Create(o.Theirhost, o.Theirport, false, o.Ourname, o.Theirname);
         pacs.NegotiateAsyncOps();
         using var reader = new StreamReader(fileSystem.FileStream.New(o.Filename, FileMode.Open));
-        using var csv = new CsvReader(reader, CultureInfo.GetCultureInfo("en-GB"));
+        using var csv = CsvReader.Create(reader, Utils.CsvOptions);
         await using var writer = new StreamWriter(fileSystem.FileStream.New(o.Output, FileMode.Create));
-        await using var csvout = new CsvWriter(writer, CultureInfo.InvariantCulture);
+        await using var csvout = CsvWriter.Create(writer);
         csvout.WriteHeader<FetchItem>();
-        await csvout.NextRecordAsync();
-        await csv.ReadAsync();
-        csv.ReadHeader();
         while (await csv.ReadAsync())
         {
             var studies = new List<string>();
-            var pt = NccidData.Make("Dummy centre name", csv.GetField<string>("Status"), csv.GetField<DateTime>("Date"),
-                csv.GetField("ID") ?? throw new InvalidOperationException());
+            var pt = NccidData.Make("Dummy centre name", csv.GetString("Status"), csv.Parse<DateTime>("Date"),
+                csv.GetString("ID"));
             var req = new DicomCFindRequest(DicomQueryRetrieveLevel.Study);
             req.Dataset.AddOrUpdate(new DicomTag(0x8, 0x5), "ISO_IR 192");
             req.Dataset.AddOrUpdate(DicomTag.StudyDate, Utils.DicomWindow(pt.DtWhen, 0, 21, 21));
@@ -52,7 +49,6 @@ public sealed class Nccidmain(IFileSystem fileSystem)
             if (studies.Count > 0)
             {
                 csvout.WriteRecord(new FetchItem(pt.Pseudonym, pt is PositiveData, pt.SpecialFormatTimestamp));
-                await csvout.NextRecordAsync();
             }
 
             Console.WriteLine(JsonSerializer.Serialize(pt));
@@ -76,23 +72,21 @@ public sealed class Nccidmain(IFileSystem fileSystem)
     public async Task Upload(UploadOptions o, ObjectSender os)
     {
         using var reader = new StreamReader(fileSystem.FileStream.New(o.Filename, FileMode.Open));
-        using var csv = new CsvReader(reader, CultureInfo.GetCultureInfo("en-GB"));
-        await csv.ReadAsync();
-        csv.ReadHeader();
+        using var csv = CsvReader.Create(reader, Utils.CsvOptions);
         while (await csv.ReadAsync())
         {
             try
             {
-                var datum = NccidData.Make(o.CentreName, csv.GetField<string>("Status"), Utils.ParseDate(csv.GetField("Date") ?? string.Empty),
-                    csv.GetField("ID") ?? throw new InvalidOperationException());
+                var datum = NccidData.Make(o.CentreName, csv.GetString("Status"), Utils.ParseDate(csv.GetString("Date")),
+                    csv.GetString("ID"));
                 var json = datum.ToJson();
                 await using var ms = new MemoryStream(json, false);
                 os(ms, o.Bucket, datum.S3Path(o.Prefix));
-                Console.WriteLine($"Uploaded CSV row {csv.Parser.Row}");
+                Console.WriteLine($"Uploaded CSV row {csv.RowNumber + 1}");
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Error '{e}' uploading JSON for '{csv.Parser.RawRecord}'");
+                Console.WriteLine($"Error '{e}' uploading JSON for '{csv.Current.ToString()}'");
             }
         }
 

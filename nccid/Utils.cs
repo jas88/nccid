@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
+using CsvHelper;
 
 namespace nccid;
 
@@ -7,10 +8,21 @@ public static partial class Utils
 {
     private static readonly Regex YearMonthDay = YearMonthDayRegex();
 
+    /// <summary>
+    /// Reject malformed input instead of CsvHelper's default of recovering from it, and read en-GB dates
+    /// </summary>
+    public static readonly CsvReaderOptions CsvOptions = new()
+    {
+        FormatProvider = CultureInfo.GetCultureInfo("en-GB"),
+        Separator = ',',
+        MissingField = CsvMissingFieldHandling.Throw,
+        MalformedData = CsvMalformedDataHandling.Throw
+    };
+
     public static DateTime ParseDate(string ds)
     {
         var digits = YearMonthDay.Match(ds);
-        if (!digits.Success) return DateTime.Parse(ds, CultureInfo.InvariantCulture);
+        if (!digits.Success) return DateTime.Parse(ds, CsvOptions.FormatProvider);
 
         var y = int.Parse(digits.Groups[1].Value, CultureInfo.InvariantCulture);
         var m = int.Parse(digits.Groups[3].Value, CultureInfo.InvariantCulture);
