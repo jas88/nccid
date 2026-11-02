@@ -86,7 +86,8 @@ public sealed partial class Nccidmain(IFileSystem fileSystem)
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Error '{e}' uploading JSON for '{csv.Current.ToString()}'");
+                var row = csv.Current.ToString();
+                Console.WriteLine($"Error '{e}' uploading JSON for '{row}'");
             }
         }
 

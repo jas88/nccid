@@ -97,7 +97,7 @@ public static class CsvHandlingTests
         var root = Path.GetPathRoot(Path.GetTempPath()) ?? throw new InvalidOperationException();
         var mfs = new MockFileSystem(new Dictionary<string, MockFileData>
         {
-            { Path.Combine(root, "testcsv", "short.csv"), new MockFileData("testid,cola\ntest1\n") }
+            { Path.Join(root, "testcsv", "short.csv"), new MockFileData("testid,cola\ntest1\n") }
         }, root);
         Assert.Throws<IndexOutOfRangeException>(() => _ = new CsvMerger("testid", "testcsv", mfs));
     }
