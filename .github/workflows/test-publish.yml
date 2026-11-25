@@ -31,8 +31,7 @@ jobs:
         queries: +security-and-quality
     - name : Test
       run: |
-        dotnet test --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=lcov
-        cp nccid.Tests/TestResults/*/coverage.info lcov.info
+        dotnet test --results-directory TestResults --coverage --coverage-output-format cobertura --coverage-output coverage.cobertura.xml
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v4
       if: startsWith(github.event_name, 'pull_request')
@@ -43,7 +42,8 @@ jobs:
       if: startsWith(github.event_name, 'pull_request')
       with:
         github-token: ${{secrets.GITHUB_TOKEN }}
-        path-to-lcov: 'lcov.info'
+        file: TestResults/coverage.cobertura.xml
+        format: cobertura
     - name: Build
       run: ./build.sh
     - name: Upload binaries to release

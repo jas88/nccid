@@ -13,7 +13,6 @@
         </PackageReference>
         <PackageReference Include="NUnit3TestAdapter" />
         <PackageReference Include="System.IO.Abstractions.TestingHelpers" />
-        <PackageReference Include="coverlet.collector" PrivateAssets="all" />
     </ItemGroup>
 
     <ItemGroup>
