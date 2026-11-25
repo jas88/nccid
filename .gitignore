@@ -1,4 +1,4 @@
 .vs/**
 **/bin/**
 **/obj/**
-nccid.Tests/TestResults/
+TestResults/
